@@ -4,8 +4,12 @@ go 1.19
 
 require (
 	github.com/Masterminds/squirrel v1.5.3
+	github.com/golang/protobuf v1.5.2
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/lib/pq v1.10.7
+	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57
+	google.golang.org/grpc v1.52.3
+	google.golang.org/protobuf v1.28.1
 )
 
 require (

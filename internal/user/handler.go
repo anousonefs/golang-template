@@ -1,9 +1,10 @@
 package user
 
 import (
-	"net/http"
-
+	helper "github.com/anousoneFS/clean-architecture/helper"
 	"github.com/labstack/echo/v4"
+	"google.golang.org/protobuf/encoding/protojson"
+	"net/http"
 )
 
 type userHandler struct {
@@ -23,7 +24,9 @@ func (h *userHandler) listUsers(c echo.Context) error {
 	ctx := c.Request().Context()
 	resp, err := h.userUC.List(ctx)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "error"})
+		hs := helper.HttpStatusPbFromRPC(helper.GRPCStatusFromErr(err))
+		b, _ := protojson.Marshal(hs)
+		return c.JSONBlob(int(hs.Error.Code), b)
 	}
 	return c.JSON(http.StatusCreated, resp)
 }
