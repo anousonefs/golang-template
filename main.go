@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	cmd "github.com/anousoneFS/clean-architecture/cmd"
+)
 
 func main() {
-	fmt.Println("vim-go")
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
 }
