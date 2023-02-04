@@ -43,7 +43,7 @@ func Run() error {
 	e := newEchoServer(cfg)
 
 	userUC := user.NewUserUC(db)
-	user.NewHandler(e, *userUC)
+	user.NewHandler(e, userUC)
 
 	go func() {
 		errCh <- e.Start(":" + cfg.Port)

@@ -6,7 +6,7 @@ import (
 	"github.com/anousoneFS/clean-architecture/config"
 )
 
-func (r userUC) list(ctx context.Context) ([]User, error) {
+func (r UserUC) list(ctx context.Context) ([]User, error) {
 	query, args, err := config.Psql().
 		Select("name", "age").
 		From("users").
@@ -30,7 +30,7 @@ func (r userUC) list(ctx context.Context) ([]User, error) {
 	return resp, nil
 }
 
-func (r userUC) create(ctx context.Context, req User) error {
+func (r UserUC) create(ctx context.Context, req User) error {
 	query, args, err := config.Psql().
 		Insert("users").
 		Columns("name", "age").

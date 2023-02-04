@@ -5,19 +5,19 @@ import (
 	"database/sql"
 )
 
-type userUC struct {
+type UserUC struct {
 	db *sql.DB
 }
 
-func NewUserUC(db *sql.DB) *userUC {
-	return &userUC{db}
+func NewUserUC(db *sql.DB) *UserUC {
+	return &UserUC{db}
 }
 
-func (u *userUC) Create(ctx context.Context, req User) error {
+func (u *UserUC) Create(ctx context.Context, req User) error {
 	return u.create(ctx, req)
 }
 
-func (u *userUC) List(ctx context.Context) ([]User, error) {
+func (u *UserUC) List(ctx context.Context) ([]User, error) {
 	resp, err := u.list(ctx)
 	if err != nil {
 		return []User{}, err
