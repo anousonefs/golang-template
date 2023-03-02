@@ -1,0 +1,13 @@
+stages: 
+  - test
+
+unit test:
+  stage: test
+  image: golang:1.19-alpine
+  script:
+    - go test ./... -v -tags=unit
+
+
+
+
+
