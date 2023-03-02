@@ -9,10 +9,10 @@ import (
 )
 
 type UserHandler struct {
-	UserUC *UserUC
+	UserUC *UserUsecase
 }
 
-func NewHandler(e *echo.Echo, userUC *UserUC) {
+func NewHandler(e *echo.Echo, userUC *UserUsecase) {
 	h := &UserHandler{
 		UserUC: userUC,
 	}

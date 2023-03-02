@@ -34,7 +34,7 @@ func TestITListUsers(t *testing.T) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		usecase := NewUserUC(db)
+		usecase := NewUserUsecase(db)
 		h := UserHandler{
 			UserUC: usecase,
 		}

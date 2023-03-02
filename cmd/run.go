@@ -42,7 +42,7 @@ func Run() error {
 
 	e := newEchoServer(cfg)
 
-	userUC := user.NewUserUC(db)
+	userUC := user.NewUserUsecase(db)
 	user.NewHandler(e, userUC)
 
 	go func() {

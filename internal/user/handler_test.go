@@ -29,7 +29,7 @@ func TestListUsers(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	usecase := NewUserUC(db)
+	usecase := NewUserUsecase(db)
 	h := UserHandler{
 		UserUC: usecase,
 	}

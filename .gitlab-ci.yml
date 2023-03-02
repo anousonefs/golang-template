@@ -1,0 +1,25 @@
+stages: 
+  - test
+  - build
+
+unit test:
+  stage: test
+  image: golang:1.19-alpine
+  script:
+    - apk add build-base
+    - go test ./... -v -tags=unit
+
+build:
+  stage: build
+  image: golang:1.19-alpine
+  script:
+    - echo "building ..."
+    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w -extldflags '-static'" -installsuffix cgo -tags netgo -o clean-template .
+  artifacts:
+    paths:
+      - clean-template
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
+
+
