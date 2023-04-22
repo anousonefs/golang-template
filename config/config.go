@@ -84,8 +84,10 @@ func NewConfig() (config Config, err error) {
 	config.dbHost = GetEnv("PGHOST", "127.0.0.1")
 	config.dbPort = GetEnv("PGPORT", "5432")
 	config.dbUser = os.Getenv("PGUSER")
+	config.dbUser = "anousone"
 	config.password = os.Getenv("PGSECRET")
 	config.dbName = os.Getenv("PGDATABASE")
+	config.dbName = "clean_architecture"
 	config.BaseUrl = os.Getenv("BASE_URL")
 	config.TwilioServiceSID = os.Getenv("TWILIO_SERVICE_SID")
 	config.TwilioAuthToken = os.Getenv("TWILIO_AUTHTOKEN")

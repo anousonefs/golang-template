@@ -8,7 +8,7 @@ import (
 
 func (r UserUsecase) list(ctx context.Context) ([]User, error) {
 	query, args, err := config.Psql().
-		Select("name", "age").
+		Select("name", "age", "phone").
 		From("users").
 		ToSql()
 	if err != nil {
@@ -19,7 +19,7 @@ func (r UserUsecase) list(ctx context.Context) ([]User, error) {
 	resp := []User{}
 	for rows.Next() {
 		var i User
-		if err := rows.Scan(&i.Name, &i.Age); err != nil {
+		if err := rows.Scan(&i.Name, &i.Age, &i.Phone); err != nil {
 			return []User{}, err
 		}
 		resp = append(resp, i)
