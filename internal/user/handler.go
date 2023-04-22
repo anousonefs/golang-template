@@ -3,36 +3,34 @@ package user
 import (
 	"net/http"
 
-	helper "github.com/anousoneFS/clean-architecture/helper"
+	"github.com/anousoneFS/clean-architecture/helper"
 	"github.com/labstack/echo/v4"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type UserHandler struct {
-	UserUC *UserUsecase
+	UserUC UserUsecase
 }
 
-func NewHandler(e *echo.Echo, userUC *UserUsecase) {
+func NewHandler(e *echo.Echo, userUC UserUsecase) {
 	h := &UserHandler{
 		UserUC: userUC,
 	}
 	api := e.Group("/v1/users")
-	api.GET("", h.ListUsers)
-	api.POST("", h.CreateUser)
+	api.GET("", h.listUsers)
+	api.POST("", h.createUser)
+	api.GET("/:id", h.get)
 }
 
-func (h *UserHandler) ListUsers(c echo.Context) error {
+func (h *UserHandler) listUsers(c echo.Context) error {
 	ctx := c.Request().Context()
-	resp, err := h.UserUC.List(ctx)
+	res, err := h.UserUC.List(ctx)
 	if err != nil {
-		hs := helper.HttpStatusPbFromRPC(helper.GRPCStatusFromErr(err))
-		b, _ := protojson.Marshal(hs)
-		return c.JSONBlob(int(hs.Error.Code), b)
+		return nil
 	}
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, res)
 }
 
-func (h *UserHandler) CreateUser(c echo.Context) error {
+func (h *UserHandler) createUser(c echo.Context) error {
 	var req User
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"message": "bad request"})
@@ -42,4 +40,14 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "error"})
 	}
 	return c.JSON(http.StatusCreated, echo.Map{"message": "created"})
+}
+
+func (h *UserHandler) get(c echo.Context) error {
+	id := c.Param("id")
+	ctx := c.Request().Context()
+	res, err := h.UserUC.Get(ctx, id)
+	if err != nil {
+		return c.JSON(helper.GetHttpStatus(err), helper.GetErrMessage(err))
+	}
+	return c.JSON(http.StatusOK, res)
 }

@@ -2,11 +2,20 @@ package user
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/anousoneFS/clean-architecture/config"
 )
 
-func (r UserUsecase) list(ctx context.Context) ([]User, error) {
+type UserRepo struct {
+	db *sql.DB
+}
+
+func New(db *sql.DB) UserRepo {
+	return UserRepo{db: db}
+}
+
+func (r UserRepo) List(ctx context.Context) ([]User, error) {
 	query, args, err := config.Psql().
 		Select("name", "age", "phone").
 		From("users").
@@ -30,7 +39,7 @@ func (r UserUsecase) list(ctx context.Context) ([]User, error) {
 	return resp, nil
 }
 
-func (r UserUsecase) create(ctx context.Context, req User) error {
+func (r UserRepo) Create(ctx context.Context, req User) error {
 	query, args, err := config.Psql().
 		Insert("users").
 		Columns("name", "age").
@@ -44,4 +53,21 @@ func (r UserUsecase) create(ctx context.Context, req User) error {
 		return err
 	}
 	return nil
+}
+
+func (r UserRepo) Get(ctx context.Context, id string) (res *User, err error) {
+	query, args, err := config.Psql().
+		Select("name", "age", "phone").
+		From("users").
+		Where("id = ?", id).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var i User
+	row := r.db.QueryRowContext(ctx, query, args...)
+	if err := row.Scan(&i.Name, &i.Age, &i.Phone); err != nil {
+		return nil, err
+	}
+	return &i, nil
 }

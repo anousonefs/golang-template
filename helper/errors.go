@@ -1,213 +1,83 @@
 package helper
 
-import (
-	"errors"
-	"net/http"
+import "errors"
 
-	hspb "github.com/anousoneFS/clean-architecture/proto/http"
-	"google.golang.org/genproto/googleapis/rpc/code"
-	edpb "google.golang.org/genproto/googleapis/rpc/errdetails"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-)
+var ErrNotFound = errors.New("not found der")
+var ErrUnauthorize = errors.New("unauthorize")
 
-var (
-	// ErrUnauthorized is returned when the user is not authorized.
-	ErrUnauthorized = errors.New("unauthorized")
-	// ErrPermissionDenied is returned when the user
-	// does not have permission to perform the action.
-	ErrPermissionDenied = errors.New("permission denied")
-	// ErrNoInfo is returned when no info is found.
-	ErrNoInfo = errors.New("no info")
-	// ErrUnProcessAbleEntity is returned when it unprocessable entity
-	ErrUnProcessAbleEntity = errors.New("unprocessable entity")
-	// ErrInternalServerError is returned when it internal server error
-	ErrInternalServerError = errors.New("internal server error")
-	// ErrAlreadyExist is returned when resource was existed
-	ErrAlreadyExist = errors.New("already exist")
-)
+type AppError struct {
+	// Code is the error code.
+	Code int `json:"code"`
 
-var StatusInvalidENUM = func() *status.Status {
-	s, _ := status.New(codes.InvalidArgument, "Invalid ENUM").
-		WithDetails(&edpb.ErrorInfo{
-			Reason: "INVALID_ENUM",
-			Domain: "laopost",
-		})
-	return s
-}()
+	// Message is the error message.
+	Message string `json:"message"`
 
-var StatusInvalidUUID = func() *status.Status {
-	s, _ := status.New(codes.InvalidArgument, "Invalid UUID").
-		WithDetails(&edpb.ErrorInfo{
-			Reason: "INVALID_UUID",
-			Domain: "laopost",
-		})
-	return s
-}()
+	// Description is the error description.
+	Description string `json:"description,omitempty"`
 
-var StatusBindingFailure = func() *status.Status {
-	s, _ := status.New(codes.InvalidArgument, "Binding JSON body failure. Please pass a valid JSON body").
-		WithDetails(&edpb.ErrorInfo{
-			Reason: "BINDING_FAILURE",
-			Domain: "laopost",
-		})
-	return s
-}()
-
-var StatusInvalidPassword = func() *status.Status {
-	s, _ := status.New(codes.InvalidArgument, "password length should greater than 6").
-		WithDetails(&edpb.ErrorInfo{
-			Reason: "INVALID_PASSWORD",
-			Domain: "laopost",
-		})
-	return s
-}()
-
-var StatusUnauthenticated = func() *status.Status {
-	s, _ := status.New(codes.Unauthenticated, "ID token not valid. Please pass a valid ID token.").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "TOKEN_INVALID",
-				Domain: "laopost.com.la",
-				Metadata: map[string]string{
-					"service": "laopost",
-				},
-			})
-	return s
-}()
-
-var StatusSessionExpired = func() *status.Status {
-	s, _ := status.New(codes.Unauthenticated, "Session has been expired. Please make a new session and try again.").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "SESSION_EXPIRED",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-var StatusPermissionDenied = func() *status.Status {
-	s, _ := status.New(codes.PermissionDenied, "You does't have sufficient permission to perform action.").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "INSUFFICIENT_PERMISSION",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-var StatusNoInfo = func() *status.Status {
-	s, _ := status.New(codes.NotFound, "Info not found").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "NOT_FOUND",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-var StatusOutOfRange = func() *status.Status {
-	s, _ := status.New(codes.OutOfRange, "Unprocessable Entity").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "UNPROCESSABLE_ENTITY",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-var StatusInternalServerError = func() *status.Status {
-	s, _ := status.New(codes.Internal, "Internal Server Error").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "INTERNAL_SERVER_ERROR",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-var StatusAlreadyExist = func() *status.Status {
-	s, _ := status.New(codes.AlreadyExists, "already exists").
-		WithDetails(
-			&edpb.ErrorInfo{
-				Reason: "ALREADY_EXISTS",
-				Domain: "laopost",
-			})
-	return s
-}()
-
-func GRPCStatusFromErr(err error) *status.Status {
-	switch {
-	case err == nil:
-		return status.New(codes.OK, "OK")
-	case errors.Is(err, ErrUnauthorized):
-		return StatusUnauthenticated
-	case errors.Is(err, ErrPermissionDenied):
-		return StatusPermissionDenied
-	case errors.Is(err, ErrNoInfo):
-		return StatusNoInfo
-	case errors.Is(err, ErrUnProcessAbleEntity):
-		return StatusOutOfRange
-	case errors.Is(err, ErrInternalServerError):
-		return StatusInternalServerError
-	case errors.Is(err, ErrAlreadyExist):
-		return StatusAlreadyExist
-	}
-
-	return StatusInternalServerError
+	// Detail is the error detail of validation
+	Detail *ErrDetail `json:"detail,omitempty"`
 }
 
-func HttpStatusPbFromRPC(s *status.Status) *hspb.Error {
-	return &hspb.Error{
-		Error: &hspb.Error_Status{
-			Code:    int32(httpStatusFromCode(s.Code())),
-			Status:  code.Code(s.Code()),
-			Message: s.Message(),
-			Details: s.Proto().Details,
-		},
+// ErrDetail is used to represent an error detail.
+type ErrDetail struct {
+	// Kind is the error kind.
+	Kind string `json:"kind,omitempty"`
+
+	// Field is the error field.
+	Field string `json:"field,omitempty"`
+
+	// Description is the error description.
+	Description string `json:"description,omitempty"`
+}
+
+func (e AppError) Error() string {
+	return ""
+}
+
+func GetHttpStatus(e error) int {
+	v, ok := e.(AppError)
+	if ok {
+		return v.Code
+	} else {
+		switch {
+		case e == nil:
+			return 200
+		case errors.Is(e, ErrNotFound):
+			return 401
+		case errors.Is(e, ErrUnauthorize):
+			return 403
+		default:
+			return 500
+		}
 	}
 }
 
-// httpStatusFromCode converts a gRPC error code into the corresponding HTTP response status.
-// See: https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func httpStatusFromCode(code codes.Code) int {
-	switch code {
-	case codes.OK:
-		return http.StatusOK
-	case codes.Canceled:
-		return http.StatusRequestTimeout
-	case codes.Unknown:
-		return http.StatusInternalServerError
-	case codes.InvalidArgument:
-		return http.StatusBadRequest
-	case codes.DeadlineExceeded:
-		return http.StatusGatewayTimeout
-	case codes.NotFound:
-		return http.StatusNotFound
-	case codes.AlreadyExists:
-		return http.StatusConflict
-	case codes.PermissionDenied:
-		return http.StatusForbidden
-	case codes.Unauthenticated:
-		return http.StatusUnauthorized
-	case codes.ResourceExhausted:
-		return http.StatusTooManyRequests
-	case codes.FailedPrecondition:
-		// Note, this deliberately doesn't translate to the similarly named '412 Precondition Failed' HTTP response status.
-		return http.StatusBadRequest
-	case codes.Aborted:
-		return http.StatusConflict
-	case codes.OutOfRange:
-		return http.StatusBadRequest
-	case codes.Unimplemented:
-		return http.StatusNotImplemented
-	case codes.Internal:
-		return http.StatusInternalServerError
-	case codes.Unavailable:
-		return http.StatusServiceUnavailable
-	case codes.DataLoss:
-		return http.StatusInternalServerError
+func GetErrMessage(e error) error {
+	v, ok := e.(AppError)
+	if ok {
+		if v.Message == "" {
+			v.Message = GetMessage(v.Code)
+			return v
+		}
+		return v
+	} else {
+		return AppError{
+			Code:    GetHttpStatus(e),
+			Message: e.Error(),
+		}
 	}
+}
 
-	return http.StatusInternalServerError
+func GetMessage(n int) string {
+	switch n {
+	case 401:
+		return "not found"
+	case 403:
+		return "unauthorize"
+	case 400:
+		return "bad request"
+	default:
+		return "internal server error"
+	}
 }

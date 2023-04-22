@@ -3,24 +3,39 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
+
+	"github.com/anousoneFS/clean-architecture/helper"
 )
 
 type UserUsecase struct {
-	db *sql.DB
+	repo UserRepo
 }
 
-func NewUserUsecase(db *sql.DB) *UserUsecase {
-	return &UserUsecase{db}
+func NewUserUsecase(repo UserRepo) UserUsecase {
+	return UserUsecase{repo}
 }
 
 func (u *UserUsecase) Create(ctx context.Context, req User) error {
-	return u.create(ctx, req)
+	return u.repo.Create(ctx, req)
 }
 
 func (u *UserUsecase) List(ctx context.Context) ([]User, error) {
-	resp, err := u.list(ctx)
+	res, err := u.repo.List(ctx)
 	if err != nil {
 		return []User{}, err
 	}
-	return resp, err
+	return res, err
+}
+
+func (u *UserUsecase) Get(ctx context.Context, id string) (res *User, err error) {
+	res, err = u.repo.Get(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, helper.AppError{Code: 406, Message: "wowow"}
+			// return nil, helper.ErrUnauthorize
+		}
+		return nil, err
+	}
+	return res, err
 }
