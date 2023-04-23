@@ -39,3 +39,14 @@ func (u *UserUsecase) Get(ctx context.Context, id string) (res *User, err error)
 	}
 	return res, err
 }
+
+func (u *UserUsecase) GetByUsername(ctx context.Context, username string) (res *User, err error) {
+	res, err = u.repo.GetByUsername(ctx, username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, helper.AppError{Code: 401}
+		}
+		return nil, err
+	}
+	return res, err
+}

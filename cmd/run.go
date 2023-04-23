@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	config "github.com/anousoneFS/clean-architecture/config"
+	"github.com/anousoneFS/clean-architecture/internal/auth"
 	"github.com/anousoneFS/clean-architecture/internal/user"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -45,6 +47,13 @@ func Run() error {
 	repo := user.New(db)
 	userUC := user.NewUserUsecase(repo)
 	user.NewHandler(e, userUC)
+
+	key, err := hex.DecodeString(os.Getenv("PASETO_SECRET"))
+	if len(key) != 32 {
+		return err
+	}
+	authUC := auth.NewAuthUsecase(userUC, key)
+	auth.NewHandler(e, authUC)
 
 	go func() {
 		errCh <- e.Start(":" + cfg.Port)

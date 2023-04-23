@@ -71,3 +71,20 @@ func (r UserRepo) Get(ctx context.Context, id string) (res *User, err error) {
 	}
 	return &i, nil
 }
+
+func (r UserRepo) GetByUsername(ctx context.Context, username string) (res *User, err error) {
+	query, args, err := config.Psql().
+		Select("name", "age", "phone", "password").
+		From("users").
+		Where("name = ?", username).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	var i User
+	row := r.db.QueryRowContext(ctx, query, args...)
+	if err := row.Scan(&i.Name, &i.Age, &i.Phone, &i.Password); err != nil {
+		return nil, err
+	}
+	return &i, nil
+}
